@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 30,
+            "statusMessage": "Running tsc --noEmit...",
+            "command": "file=$(jq -r '.tool_input.file_path // empty' 2>/dev/null); echo \"$file\" | grep -qE '\\.(ts|tsx)$' && [ -d \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/frontend/node_modules\" ] && (cd \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/frontend\" && npx tsc --noEmit 2>&1) || true"
+          },
+          {
+            "type": "command",
+            "timeout": 30,
+            "statusMessage": "Running ruff check...",
+            "command": "file=$(jq -r '.tool_input.file_path // empty' 2>/dev/null); echo \"$file\" | grep -qE '\\.py$' && [ -d \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/backend\" ] && command -v ruff >/dev/null 2>&1 && (cd \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/backend\" && ruff check . 2>&1) || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 60,
+            "statusMessage": "Running pytest before commit...",
+            "command": "cmd=$(jq -r '.tool_input.command // empty' 2>/dev/null); if echo \"$cmd\" | grep -qE 'git commit' && [ -d \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/backend\" ] && command -v pytest >/dev/null 2>&1; then cd \"/Users/yasifjamal/MonkeyTypeWrapped/MonkeyType-Wrapped/backend\" && pytest 2>&1 || echo '{\"continue\": false, \"stopReason\": \"pytest failed — fix tests before committing\"}'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
